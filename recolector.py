@@ -40,24 +40,41 @@ def keys_to_output(keys):
         output = nk
     return output
 
-file_name = "training_data.npy"
-if os.path.isfile(file_name):
-    print("el archivo existe")
-    training_data = list(np.load(file_name))
-else:
-    print("el archivo no existe, lo creo")
-    training_data = []
+def bigestI(listDir):
+    l=[]
+    for dir in listDir:
+        i = int(dir.split("_")[3].split(".")[0])
+        l.append(i)
+    l.sort()
+    return l[-1]
 
 def screen_record():
-    for i in list(range(4))[::-1]:
-        print(i + 1)
+
+    dirs = os.listdir("./datasets")
+    base_file_name = "datasets/training_data_m_{}.npy"
+    if dirs:
+        i=bigestI(dirs)
+        file_name = base_file_name.format(i)
+        training_data = list(np.load(file_name))
+        if len(training_data) >= 10000:
+            i+=1
+            training_data = []
+    else:
+        i = 0
+        file_name = base_file_name.format(i)
+        training_data = []
+
+    for t in list(range(4))[::-1]:
+        print(t + 1)
         time.sleep(1)
 
     last_time = time.time()
+
     paused = False
     while(True):
         if not paused:
-            screen = grab_screen(region=(0,40,800,600))
+            #screen = grab_screen(region=(0,40,800,600))
+            screen = grab_screen(region=(0, 40, 797, 635))
             screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
             screen = cv2.resize(screen, (160, 120))
             #print('loop took {} seconds'.format(time.time()-last_time))
@@ -66,9 +83,15 @@ def screen_record():
             output = keys_to_output(keys)
             training_data.append([screen,output])
 
-            if len(training_data) % 600 == 0:
+            if len(training_data) % 10000 == 0:
+                training_data = []
+                i += 1
+                file_name = base_file_name.format(i)
+
+            elif len(training_data) % 1000 == 0:
                 print(len(training_data))
                 np.save(file_name,training_data)
+
 
         keys = key_check()
         if 'T' in keys:

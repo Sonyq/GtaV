@@ -1,8 +1,7 @@
 import numpy as np
-import pandas as pd
-from collections import Counter
-#from random import shuffle
-import cv2
+import os
+#import pandas as pd
+#from collections import Counter
 
 w = [1,0,0,0,0,0,0,0,0]
 s = [0,1,0,0,0,0,0,0,0]
@@ -14,22 +13,21 @@ sa = [0,0,0,0,0,0,1,0,0]
 sd = [0,0,0,0,0,0,0,1,0]
 nk = [0,0,0,0,0,0,0,0,1]
 
-train_data_m = np.load("training_data_m.npy")
-train_data_l = np.load("training_data_l.npy")
-tData = [train_data_m,train_data_l]
-print(len(train_data_m)+len(train_data_l))
-#for train_data in tData:
-#    df = pd.DataFrame(train_data)
-#    print(df.head())
-#    print(Counter(df[1].apply(str)))
+dirs = os.listdir("./datasets")
 
 lefts = []
 rights = []
 forwards = []
 rare = []
-
-for train_data in tData:
+total_samples = 0
+i=0
+balanced_data = []
+for dir_dataset in dirs:
+    i+=1
+    print("processing dataset {} of {}".format(i,len(dirs)))
+    train_data = np.load("datasets/{}".format(dir_dataset))
     np.random.shuffle(train_data)
+    total_samples += len(train_data)
 
     for data in train_data:
         img = data[0]
@@ -46,13 +44,20 @@ for train_data in tData:
         else:
             print("ninguna accion")
 
-forwards = forwards[:len(lefts)][:len(rights)]
+    forwards = forwards[:len(lefts)][:len(rights)]
+
 lefts = lefts[:len(forwards)]
 rights = rights[:len(forwards)]
 
-balanced_data = forwards + lefts + rights + rare
-np.random.shuffle(balanced_data)
-print(len(balanced_data))
+balanced_data += forwards
+balanced_data += lefts
+balanced_data += rights
+balanced_data += rare
 
-np.save('balanced_data1.npy',balanced_data)
+np.random.shuffle(balanced_data)
+print("total samples: "+str(total_samples))
+print("balanced data: "+str(len(balanced_data)))
+print("please wait saving data...")
+np.save('balanced_data.npy',balanced_data)
+print("done!(but wait until the f**king process ends)")
 
