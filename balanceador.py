@@ -1,6 +1,8 @@
 import numpy as np
+import h5py
 import os
-#import pandas as pd
+import time
+import sys
 #from collections import Counter
 
 w = [1,0,0,0,0,0,0,0,0]
@@ -58,6 +60,19 @@ np.random.shuffle(balanced_data)
 print("total samples: "+str(total_samples))
 print("balanced data: "+str(len(balanced_data)))
 print("please wait saving data...")
-np.save('balanced_data.npy',balanced_data)
+
+
+start = time.time()
+chunks = []
+j = 0
+base_file_name = "balanced_set_{}.npy"
+for i in range(0, len(balanced_data), 1000):
+
+    file_name = base_file_name.format(i)
+    np.save(file_name,balanced_data[i : i+1000])
+
+
+end = time.time()
+print(end - start)
 print("done!(but wait until the f**king process ends)")
 
